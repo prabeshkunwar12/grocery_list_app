@@ -36,6 +36,14 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
         _errorMessage = "Error getting the data, please try again later";
       });
     }
+
+    if (response.body == 'null') {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     final Map<String, dynamic> listData = json.decode(response.body);
     setState(() {
       _groceryItems.clear();
@@ -73,7 +81,7 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
     });
 
     final url = Uri.https(
-      'gr0cerylistapp-be305-default-rtdb.firebaseio.com',
+      'grocerylistapp-be305-default-rtdb.firebaseio.com',
       'grocery-list/${groceryItem.id}.json',
     );
 
