@@ -19,11 +19,15 @@ class _NewItemScreenState extends State<NewItemScreen> {
   final _formKey = GlobalKey<FormState>();
   String _enteredName = '';
   int _enteredQuantity = 1;
+  bool _isSending = false;
   Category _selectedCategory = categories[Categories.vegetables]!;
 
   void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
+      setState(() {
+        _isSending = true;
+      });
       final url = Uri.https(
         'grocerylistapp-be305-default-rtdb.firebaseio.com',
         'grocery-list.json',
@@ -150,14 +154,18 @@ class _NewItemScreenState extends State<NewItemScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () {
-                      _formKey.currentState!.reset();
-                    },
+                    onPressed: _isSending
+                        ? null
+                        : () {
+                            _formKey.currentState!.reset();
+                          },
                     child: const Text("Reset"),
                   ),
                   ElevatedButton(
-                    onPressed: _saveItem,
-                    child: const Text("Add Item"),
+                    onPressed: _isSending ? null : _saveItem,
+                    child: _isSending
+                        ? const Text("Adding...")
+                        : const Text("Add Item"),
                   ),
                 ],
               ),

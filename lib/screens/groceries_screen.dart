@@ -16,6 +16,7 @@ class GroceriesScreen extends StatefulWidget {
 
 class _GroceriesScreenState extends State<GroceriesScreen> {
   final List<GroceryItem> _groceryItems = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -24,7 +25,6 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
   }
 
   void _loadItems() async {
-    _groceryItems.clear();
     final url = Uri.https(
       'grocerylistapp-be305-default-rtdb.firebaseio.com',
       'grocery-list.json',
@@ -32,6 +32,7 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
     final response = await http.get(url);
     final Map<String, dynamic> listData = json.decode(response.body);
     setState(() {
+      _groceryItems.clear();
       for (final item in listData.entries) {
         _groceryItems.add(GroceryItem(
           id: item.key,
@@ -42,6 +43,7 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
                   (catItem) => catItem.value.name == item.value['category'])
               .value,
         ));
+        _isLoading = false;
       }
     });
   }
@@ -64,35 +66,47 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
     });
   }
 
-  final Widget _fallback = const Padding(
-    padding: EdgeInsets.symmetric(horizontal: 36.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Your Grocery List is empty!",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(
-          height: 24,
-        ),
-        Text(
-          "Fill your list with grocery items by pressing '+' icon at the top",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-      ],
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
+    const Widget loading = Center(
+      child: CircularProgressIndicator(),
+    );
+
+    const Widget fallback = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 36.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "Your Grocery List is empty!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(
+            height: 24,
+          ),
+          Text(
+            "Fill your list with grocery items by pressing '+' icon at the top",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Widget content = ListView.builder(
+      itemCount: _groceryItems.length,
+      itemBuilder: (ctx, index) => GroceryItemWidget(
+        groceryItem: _groceryItems[index],
+        removeItem: _removeItem,
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Groceries'),
@@ -103,15 +117,11 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
           ),
         ],
       ),
-      body: _groceryItems.isEmpty
-          ? _fallback
-          : ListView.builder(
-              itemCount: _groceryItems.length,
-              itemBuilder: (ctx, index) => GroceryItemWidget(
-                groceryItem: _groceryItems[index],
-                removeItem: _removeItem,
-              ),
-            ),
+      body: _isLoading
+          ? loading
+          : _groceryItems.isEmpty
+              ? fallback
+              : content,
     );
   }
 }
