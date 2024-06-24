@@ -27,6 +27,12 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
     });
   }
 
+  void _removeItem(GroceryItem groceryItem) {
+    setState(() {
+      _groceryItems.remove(groceryItem);
+    });
+  }
+
   final Widget _fallback = const Padding(
     padding: EdgeInsets.symmetric(horizontal: 36.0),
     child: Column(
@@ -70,8 +76,10 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
           ? _fallback
           : ListView.builder(
               itemCount: _groceryItems.length,
-              itemBuilder: (ctx, index) =>
-                  GroceryItemWidget(groceryItem: _groceryItems[index]),
+              itemBuilder: (ctx, index) => GroceryItemWidget(
+                groceryItem: _groceryItems[index],
+                removeItem: _removeItem,
+              ),
             ),
     );
   }
