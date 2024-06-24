@@ -30,36 +30,42 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
       'grocerylistapp-be305-default-rtdb.firebaseio.com',
       'grocery-list.json',
     );
-    final response = await http.get(url);
-    if (response.statusCode >= 400) {
-      setState(() {
-        _errorMessage = "Error getting the data, please try again later";
-      });
-    }
-
-    if (response.body == 'null') {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    final Map<String, dynamic> listData = json.decode(response.body);
-    setState(() {
-      _groceryItems.clear();
-      for (final item in listData.entries) {
-        _groceryItems.add(GroceryItem(
-          id: item.key,
-          name: item.value['name'],
-          quantity: item.value['quantity'],
-          category: categories.entries
-              .firstWhere(
-                  (catItem) => catItem.value.name == item.value['category'])
-              .value,
-        ));
-        _isLoading = false;
+    try {
+      final response = await http.get(url);
+      if (response.statusCode >= 400) {
+        setState(() {
+          _errorMessage = "Error getting the data, please try again later";
+        });
       }
-    });
+
+      if (response.body == 'null') {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final Map<String, dynamic> listData = json.decode(response.body);
+      setState(() {
+        _groceryItems.clear();
+        for (final item in listData.entries) {
+          _groceryItems.add(GroceryItem(
+            id: item.key,
+            name: item.value['name'],
+            quantity: item.value['quantity'],
+            category: categories.entries
+                .firstWhere(
+                    (catItem) => catItem.value.name == item.value['category'])
+                .value,
+          ));
+          _isLoading = false;
+        }
+      });
+    } catch (err) {
+      setState(() {
+        _errorMessage = 'Something went wrong! Please try again later.';
+      });
+    }
   }
 
   void _addItem() async {
@@ -85,9 +91,9 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
       'grocery-list/${groceryItem.id}.json',
     );
 
-    final response = await http.delete(url);
-
-    if (response.statusCode >= 400) {
+    try {
+      await http.delete(url);
+    } catch (err) {
       setState(() {
         _groceryItems.insert(index, groceryItem);
       });

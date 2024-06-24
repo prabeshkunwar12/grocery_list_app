@@ -32,30 +32,34 @@ class _NewItemScreenState extends State<NewItemScreen> {
         'grocerylistapp-be305-default-rtdb.firebaseio.com',
         'grocery-list.json',
       );
-      final response = await http.post(
-        url,
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: json.encode({
-          'name': _enteredName,
-          'quantity': _enteredQuantity,
-          'category': _selectedCategory.name,
-        }),
-      );
+      try {
+        final response = await http.post(
+          url,
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: json.encode({
+            'name': _enteredName,
+            'quantity': _enteredQuantity,
+            'category': _selectedCategory.name,
+          }),
+        );
 
-      final Map<String, dynamic> resData = json.decode(response.body);
+        final Map<String, dynamic> resData = json.decode(response.body);
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      Navigator.of(context).pop(
-        GroceryItem(
-          id: resData['name'],
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory,
-        ),
-      );
+        Navigator.of(context).pop(
+          GroceryItem(
+            id: resData['name'],
+            name: _enteredName,
+            quantity: _enteredQuantity,
+            category: _selectedCategory,
+          ),
+        );
+      } catch (err) {
+        _isSending = false;
+      }
     }
   }
 
