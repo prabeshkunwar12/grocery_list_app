@@ -66,10 +66,24 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
     });
   }
 
-  void _removeItem(GroceryItem groceryItem) {
+  void _removeItem(GroceryItem groceryItem) async {
+    int index = _groceryItems.indexOf(groceryItem);
     setState(() {
       _groceryItems.remove(groceryItem);
     });
+
+    final url = Uri.https(
+      'gr0cerylistapp-be305-default-rtdb.firebaseio.com',
+      'grocery-list/${groceryItem.id}.json',
+    );
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      setState(() {
+        _groceryItems.insert(index, groceryItem);
+      });
+    }
   }
 
   @override
