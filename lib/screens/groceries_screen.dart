@@ -27,6 +27,33 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
     });
   }
 
+  final Widget _fallback = const Padding(
+    padding: EdgeInsets.symmetric(horizontal: 36.0),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Your Grocery List is empty!",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 24,
+        ),
+        Text(
+          "Fill your list with grocery items by pressing '+' icon at the top",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,11 +66,13 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _groceryItems.length,
-        itemBuilder: (ctx, index) =>
-            GroceryItemWidget(groceryItem: _groceryItems[index]),
-      ),
+      body: _groceryItems.isEmpty
+          ? _fallback
+          : ListView.builder(
+              itemCount: _groceryItems.length,
+              itemBuilder: (ctx, index) =>
+                  GroceryItemWidget(groceryItem: _groceryItems[index]),
+            ),
     );
   }
 }
