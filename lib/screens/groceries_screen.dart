@@ -17,6 +17,7 @@ class GroceriesScreen extends StatefulWidget {
 class _GroceriesScreenState extends State<GroceriesScreen> {
   final List<GroceryItem> _groceryItems = [];
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -30,6 +31,11 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
       'grocery-list.json',
     );
     final response = await http.get(url);
+    if (response.statusCode >= 400) {
+      setState(() {
+        _errorMessage = "Error getting the data, please try again later";
+      });
+    }
     final Map<String, dynamic> listData = json.decode(response.body);
     setState(() {
       _groceryItems.clear();
@@ -107,6 +113,10 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
       ),
     );
 
+    Widget error = Center(
+      child: _errorMessage != null ? Text(_errorMessage!) : null,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Groceries'),
@@ -117,11 +127,13 @@ class _GroceriesScreenState extends State<GroceriesScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? loading
-          : _groceryItems.isEmpty
-              ? fallback
-              : content,
+      body: _errorMessage != null
+          ? error
+          : _isLoading
+              ? loading
+              : _groceryItems.isEmpty
+                  ? fallback
+                  : content,
     );
   }
 }
